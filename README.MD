@@ -67,5 +67,6 @@ There are just two steps needed to install django-sofortueberweisung:
 
 ## What do you need for django-sofortueberweisung?
 
-1. Django >= 1.5
-2. An account on sofort.com
+1. An account on sofort.com
+2. Django >= 1.5
+3. xmltodict >= 0.9.2
