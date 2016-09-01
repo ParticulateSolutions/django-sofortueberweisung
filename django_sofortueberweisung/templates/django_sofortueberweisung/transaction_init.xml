@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<multipay>
+    <project_id>{{ project_id }}</project_id>
+    <interface_version>{{ interface_version }}</interface_version>
+    <amount>{{ amount }}</amount>
+    <currency_code>{{ currency_code }}</currency_code>
+    {% if timeout %}{{ timeout }}{% endif %}
+    {% if email_customer %}{{ email_customer }}{% endif %}
+    {% if phone_customer %}{{ phone_customer }}{% endif %}
+    {% if sender %}
+        <sender>
+            {% if sender.holder %}<holder>{{ sender.holder }}</holder>{% endif %}
+            {% if sender.iban %}<iban>{{ sender.iban }}</iban>{% endif %}
+            {% if sender.bic %}<bic>{{ sender.bic }}</bic>{% endif %}
+            {% if sender.account_number %}<account_number>{{ sender.account_number }}</account_number>{% endif %}
+            {% if sender.bank_code %}<bank_code>{{ sender.bank_code }}</bank_code>{% endif %}
+            {% if sender.country_code %}<country_code>{{ sender.country_code }}</country_code>{% endif %}
+        </sender>
+    {% endif %}
+    {% if reasons %}
+        <reasons>
+        {% for reason in reasons %}
+            <reason>{{ reason }}</reason>
+        {% endfor %}
+        </reasons>
+    {% endif %}
+    {% if user_variables %}
+        <user_variables>
+            {% for user_variable in user_variables %}
+                <user_variable>user_variable</user_variable>
+            {% endfor %}
+        </user_variables>
+    {% endif %}
+    <success_url>{{ success_url }}</success_url>
+    <success_link_redirect>{{ success_link_redirect }}</success_link_redirect>
+    <abort_url>{{ abort_url }}</abort_url>
+    <timeout_url>{{ timeout_url }}</timeout_url>
+    {% if notification_urls %}
+        <notification_urls>
+        {% for notification_url in notification_urls %}
+            <notification_url {% if notification_url.notify_on %}notfiy_on="{{ notification_url.notify_on }}"{% endif %}>{{ notification_url.url }}</notification_url>
+        {% endfor %}
+        </notification_urls>
+    {% endif %}
+    {% if notification_emails %}
+        <notification_emails>
+        {% for notification_email in notification_emails %}
+            <notification_email {% if notification_email.notify_on %}notfiy_on="{{ notification_email.notify_on }}"{% endif %}>{{ notification_email.email }}</notification_email>
+        {% endfor %}
+        </notification_emails>
+    {% endif %}
+    {% if customer_protection %}
+        <su>
+            <customer_protection>1</customer_protection>
+        </su>
+    {% else %}
+        <su />
+    {% endif %}
+</multipay>
