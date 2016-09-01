@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 import os
 
 from setuptools import setup
@@ -21,8 +19,8 @@ setup(
     name='django-sofortueberweisung',
     author='Particulate Solutions GmbH',
     author_email='tech@particulate.me',
-    description=u'Django integration of Sofort Überweisung',
-    version='0.1',
+    description=u'Django integration of Sofort.com',
+    version='0.1.1',
     url='https://github.com/ParticulateSolutions/django-sofortueberweisung',
     packages=PACKAGES,
     include_package_data=True,

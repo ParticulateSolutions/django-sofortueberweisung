@@ -4,7 +4,7 @@
 
 There are just two steps needed to install django-sofortueberweisung:
 
-1. Install django-lare to your virtual env:
+1. Install django-sofortueberweisung to your virtual env:
 
 	```bash
 	pip install django-sofortueberweisung
@@ -65,13 +65,7 @@ There are just two steps needed to install django-sofortueberweisung:
     ]
 	```
 
-## What do you need for django-lare?
+## What do you need for django-sofortueberweisung?
 
 1. Django >= 1.5
 2. An account on sofort.com
-
-## Projects using django-sofortueberweisung
-
-1. [socialfunders.org](https://socialfunders.org/)
-
-If you are using django-sofortueberweisung, please contact us, and tell us in which projects you are using it. Thank you!
