@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.http import HttpResponse
+from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
