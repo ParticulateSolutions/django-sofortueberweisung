@@ -6,6 +6,8 @@ from django.db import models, IntegrityError
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 
+from ._version import version as django_sofortueberweisung_version
+
 import xmltodict
 
 
@@ -39,7 +41,7 @@ class SofortTransaction(models.Model):
 class SofortWrapper(object):
 
     api_url = 'https://api.sofort.com/api/xml'
-    interface_version = 'django_sofortueberweisung_v1.0.0'
+    interface_version = 'django_sofortueberweisung_v%s' % django_sofortueberweisung_version
     auth = None
 
     def __init__(self, auth=None):

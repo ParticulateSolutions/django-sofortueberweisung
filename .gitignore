@@ -3,3 +3,4 @@
 *.pyc
 dist
 django_sofortueberweisung.egg-info
+build
