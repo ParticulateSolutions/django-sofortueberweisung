@@ -11,8 +11,8 @@ def get_version(package):
     """
     Return package version as listed in `__version__` in `init.py`.
     """
-    init_py = open(os.path.join(package, '_version.py')).read()
-    return re.match("version = ['\"]([^'\"]+)['\"]", init_py).group(1)
+    init_py = open(os.path.join(package, '__init__.py')).read()
+    return re.match("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
 
 
 def get_packages(package):
@@ -23,6 +23,7 @@ def get_packages(package):
             for dirpath, dirnames, filenames in os.walk(package)
             if os.path.exists(os.path.join(dirpath, '__init__.py'))]
 
+
 def get_package_data(package):
     """
     Return all files under the root package, that are not in a
@@ -30,7 +31,7 @@ def get_package_data(package):
     """
     walk = [(dirpath.replace(package + os.sep, '', 1), filenames)
             for dirpath, dirnames, filenames in os.walk(package)
-            if not os.path.exists(os.path.join(dirpath, '__init__.py'))]
+            if 'tests' not in dirnames and not os.path.exists(os.path.join(dirpath, '__init__.py'))]
 
     filepaths = []
     for base, filenames in walk:
@@ -39,8 +40,8 @@ def get_package_data(package):
     return {package: filepaths}
 
 REQUIREMENTS = [
-    'Django>=1.5',
-    'xmltodict>=0.9.2',
+    'Django>=1.8',
+    'xmltodict>=0.9.2'
 ]
 
 version = get_version('django_sofortueberweisung')
@@ -66,7 +67,7 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',

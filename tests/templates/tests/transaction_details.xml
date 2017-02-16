@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<transactions>
+    <transaction_details>
+        <project_id>53245</project_id>
+        <transaction>{{ transaction_id }}</transaction>
+        <test>1</test>
+        <time>2013-06-03T10:48:52+02:00</time>
+        <status>{{ status }}</status>
+        <status_reason>-</status_reason>
+        <status_modified>2013-06-03T10:48:52+02:00</status_modified>
+        <payment_method>su</payment_method>
+        <language_code>de</language_code>
+        <amount>{{ amount }}</amount>
+        <amount_refunded>0.00</amount_refunded>
+        <currency_code>EUR</currency_code>
+        <reasons>
+            <reason>Testueberweisung</reason>
+            <reason>99999-53245-5483-4891</reason>
+        </reasons>
+        <user_variables>
+            <user_variable>test</user_variable>
+        </user_variables>
+        <sender>
+            <holder>Max Mustermann</holder>
+            <account_number>23456789</account_number>
+            <bank_code>00000</bank_code>
+            <bank_name>Demo Bank</bank_name>
+            <bic>SFRTDE20XXX</bic>
+            <iban>DE06000000000023456789</iban>
+            <country_code>DE</country_code>
+        </sender>
+        <recipient>
+            <holder>Erika Mustermann</holder>
+            <account_number>9999999999</account_number>
+            <bank_code>00000</bank_code>
+            <bank_name>Demo Bank</bank_name>
+            <bic>SFRTDE20XXX</bic>
+            <iban>DE98000000009999999999</iban>
+            <country_code>DE</country_code>
+        </recipient>
+        <email_customer />
+        <phone_customer />
+        <exchange_rate>1.0000</exchange_rate>
+        <costs>
+            <fees>0.00</fees>
+            <currency_code>EUR</currency_code>
+            <exchange_rate>1.0000</exchange_rate>
+        </costs>
+        <su>
+            <consumer_protection>0</consumer_protection>
+        </su>
+        <status_history_items>
+            <status_history_item>
+                <status>pending</status>
+                <status_reason>-</status_reason>
+                <time>2013-06-03T10:48:52+02:00</time>
+            </status_history_item>
+        </status_history_items>
+    </transaction_details>
+</transactions>

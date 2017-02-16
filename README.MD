@@ -16,6 +16,7 @@ There are just two steps needed to install django-sofortueberweisung:
     # django-sofortueberweisung
     INSTALLED_APPS += ('django_sofortueberweisung', )
 
+    SOFORT = True
     SOFORT_USER = '99999'
     SOFORT_API_KEY = 'a12b34cd567890123e456f7890123456'
     SOFORT_PROJECT_ID = '999999'
@@ -68,5 +69,5 @@ There are just two steps needed to install django-sofortueberweisung:
 ## What do you need for django-sofortueberweisung?
 
 1. An account on sofort.com
-2. Django >= 1.5
+2. Django >= 1.8
 3. xmltodict >= 0.9.2
