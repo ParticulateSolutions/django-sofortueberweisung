@@ -48,9 +48,9 @@ def mock_urlopen(request, cafile=None):
         if url == 'https://api.sofort.com/api/xml':
             if 'transaction_request' in data:
                 if 'transaction' in data['transaction_request']:
-                    if data['transaction_request']['transaction'] == u'123-abc-received':
+                    if data['transaction_request']['transaction'] == '123-abc-received':
                         response = TEST_RESPONSES['123-abc-received']
-                    elif data['transaction_request']['transaction'] == u'123-abc-loss':
+                    elif data['transaction_request']['transaction'] == '123-abc-loss':
                         response = TEST_RESPONSES['123-abc-loss']
     except KeyError:
         response = False
