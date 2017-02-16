@@ -1,4 +1,6 @@
 # Django settings for testproject project.
+import os
+
 from django.conf import settings
 
 settings.configure(
@@ -19,6 +21,16 @@ settings.configure(
         'django_sofortueberweisung',
         'tests',
     ),
+    TEMPLATES=[
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'tests'))],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                # ... some options here ...
+            },
+        },
+    ],
 
     SOFORT=True,
     SOFORT_USER='135335',

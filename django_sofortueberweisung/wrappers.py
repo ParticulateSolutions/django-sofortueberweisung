@@ -133,7 +133,7 @@ class SofortWrapper(object):
             else:
                 logger.error("Paydirekt Error({0}): {1}".format(e.msg, body))
         else:
-            if str(response.status).startswith('2'):
+            if (hasattr(response, 'status') and str(response.status).startswith('2')) or (hasattr(response, 'status_code') and str(response.status_code).startswith('2')) or (hasattr(response, 'code') and str(response.code).startswith('2')):
                 response_body = response.read()
                 return xmltodict.parse(response_body)
         return False
