@@ -1,0 +1,2 @@
+include django_sofortueberweisung/*
+include django_sofortueberweisung/cacert.pem

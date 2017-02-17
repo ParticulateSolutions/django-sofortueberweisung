@@ -64,6 +64,7 @@ setup(
     url='https://github.com/ParticulateSolutions/django-sofortueberweisung',
     packages=get_packages('django_sofortueberweisung'),
     package_data=get_package_data('django_sofortueberweisung'),
+    include_package_data=True,
     classifiers=[
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
