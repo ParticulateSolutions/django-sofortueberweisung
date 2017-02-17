@@ -1,18 +1,18 @@
 import base64
 import logging
 import os
+import sys
 
 import xmltodict
 from django.conf import settings
-
 from django.db import IntegrityError
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 
-from django_sofortueberweisung import settings as django_sofortueberweisung_settings
-from django_sofortueberweisung.models import SofortTransaction
-
+from django_sofortueberweisung import \
+    settings as django_sofortueberweisung_settings
 from django_sofortueberweisung.__init__ import __version__
+from django_sofortueberweisung.models import SofortTransaction
 
 try:
     # For Python 3.0 and later
@@ -122,7 +122,10 @@ class SofortWrapper(object):
             request.data = xml_data
 
         try:
-            response = urlopen(request, cafile=self.cafile)
+            if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
+                response = urlopen(request, cafile=self.cafile)
+            else:
+                response = urlopen(request)
         except HTTPError as e:
             logger = logging.getLogger(__name__)
             fp = e.fp

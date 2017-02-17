@@ -1,6 +1,6 @@
 import logging
 from django.template.loader import render_to_string
-from pip._vendor.six import python_2_unicode_compatible
+from six import python_2_unicode_compatible
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
