@@ -1,4 +1,4 @@
-# django-sofortueberweisung
+# django-sofortueberweisung [![Build Status](https://travis-ci.org/ParticulateSolutions/django-sofortueberweisung.svg?branch=master)](https://travis-ci.org/ParticulateSolutions/django-sofortueberweisung)
 
 ## How to install django-sofortueberweisung?
 
