@@ -41,7 +41,8 @@ def get_package_data(package):
 
 REQUIREMENTS = [
     'Django>=1.8',
-    'xmltodict>=0.9.2'
+    'xmltodict>=0.9.2',
+    'six>=1.10.0'
 ]
 
 version = get_version('django_sofortueberweisung')
