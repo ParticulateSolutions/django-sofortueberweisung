@@ -1,2 +1,3 @@
 include django_sofortueberweisung/*
 include django_sofortueberweisung/cacert.pem
+include django_sofortueberweisung/templates/django_sofortueberweisung/*.xml
