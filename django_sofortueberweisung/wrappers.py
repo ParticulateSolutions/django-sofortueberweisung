@@ -75,6 +75,9 @@ class SofortWrapper(object):
         xml_data = render_to_string('django_sofortueberweisung/transaction_init.xml', context=data)
         response = self.call_api(xml_data=xml_data)
 
+        if response is False:
+            return False
+        
         errors = []
         if 'errors' in response:
             for error in response['errors']:
