@@ -48,7 +48,8 @@ class SofortWrapper(object):
         success_link_redirect=django_sofortueberweisung_settings.SOFORT_SUCCESS_REDIRECT,
         abort_url=django_sofortueberweisung_settings.SOFORT_ABORT_URL,
         timeout_url=django_sofortueberweisung_settings.SOFORT_TIMEOUT_URL,
-        notification_urls=django_sofortueberweisung_settings.SOFORT_NOTIFICATION_URLS):
+        notification_urls=django_sofortueberweisung_settings.SOFORT_NOTIFICATION_URLS,
+        language_code=django_sofortueberweisung_settings.SOFORT_LANGUAGE_CODE):
 
         if not self.auth:
             return False
@@ -57,7 +58,7 @@ class SofortWrapper(object):
             'interface_version': SofortWrapper.interface_version,
             'amount': '%.2f' % amount,
             'currency_code': currency_code,
-            'language_code': django_sofortueberweisung_settings.SOFORT_LANGUAGE_CODE,
+            'language_code': language_code,
             'timeout': django_sofortueberweisung_settings.SOFORT_TIMEOUT,
             'email_customer': email_customer,
             'phone_customer': phone_customer,

@@ -4,9 +4,10 @@
     <interface_version>{{ interface_version }}</interface_version>
     <amount>{{ amount }}</amount>
     <currency_code>{{ currency_code }}</currency_code>
-    {% if timeout %}{{ timeout }}{% endif %}
-    {% if email_customer %}{{ email_customer }}{% endif %}
-    {% if phone_customer %}{{ phone_customer }}{% endif %}
+    {% if timeout %}<timeout>{{ timeout }}</timeout>{% endif %}
+    {% if email_customer %}<email_customer>{{ email_customer }}</email_customer>{% endif %}
+    {% if phone_customer %}<phone_customer>{{ phone_customer }}</phone_customer>{% endif %}
+    {% if language_code %}<language_code>{{ language_code }}</language_code>{% endif %}
     {% if sender %}
         <sender>
             {% if sender.holder %}<holder>{{ sender.holder }}</holder>{% endif %}
