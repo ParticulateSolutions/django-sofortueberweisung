@@ -48,5 +48,5 @@ class NotifySofortView(View):
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(_('Sofort: Status of transaction {} is now {}').format(sofort_transaction.transaction_id, sofort_transaction.status))
-            return HttpResponse(status=202)
+            return HttpResponse(status=200)
         return HttpResponse(status=400)
