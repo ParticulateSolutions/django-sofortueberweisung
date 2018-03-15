@@ -70,7 +70,7 @@ class MockResponse(Response):
         if not response:
             self.status = 404
         else:
-            self.status = 202
+            self.status = 200
         self.response = response
 
     def read(self):
@@ -101,7 +101,7 @@ class TestSofortNotifications(TestCase):
         post_data = {'status_notification': {'transaction': '123-abc-received'}}
         xml_data = xmltodict.unparse(post_data)
         response = client.post('/sofort/notify/', data=xml_data, content_type='application/hal+json')
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, 200)
 
     @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
     def test_known_transaction_known_at_sofort_loss(self):
@@ -110,7 +110,7 @@ class TestSofortNotifications(TestCase):
         post_data = {'status_notification': {'transaction': '123-abc-loss'}}
         xml_data = xmltodict.unparse(post_data)
         response = client.post('/sofort/notify/', data=xml_data, content_type='application/hal+json')
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, 200)
 
     @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
     def test_known_transaction_unknown_at_sofort(self):

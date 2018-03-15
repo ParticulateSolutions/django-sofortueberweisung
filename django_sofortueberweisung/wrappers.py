@@ -90,15 +90,19 @@ class SofortWrapper(object):
             new_transaction = response['new_transaction']
             errors = []
             if 'warnings' in new_transaction:
-                for warning in response['warnings']:
+                for warning in new_transaction['warnings']:
                     warnings.append(warning)
 
-        if errors != {} or warnings != {}:
-            logger = logging.getLogger(__name__)
-            for error in errors:
-                logger.error("Sofort: ".format(error))
-            for warning in warnings:
-                logger.warning("Sofort: ".format(warning))
+        try:
+            if errors != {} or warnings != {}:
+                logger = logging.getLogger(__name__)
+                for error in errors:
+                    logger.error("Sofort: ".format(error.get('message', '')))
+                for warning in warnings:
+                    logger.warning("Sofort: ".format(warning.get('message', '')))
+        except:
+            pass
+
         if new_transaction != {}:
             try:
                 return SofortTransaction.objects.create(transaction_id=new_transaction['transaction'], payment_url=new_transaction['payment_url'])
