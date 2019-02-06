@@ -4,11 +4,9 @@
 from __future__ import unicode_literals
 
 import os
-import time
 import xmltodict
-from pip._vendor.requests import Response
+from requests import Response
 from testfixtures import replace
-
 
 from django.conf.urls import include, url
 from django.test import Client, TestCase
@@ -121,6 +119,12 @@ class TestSofortNotifications(TestCase):
         response = client.post('/sofort/notify/', data=xml_data, content_type='application/hal+json')
         self.assertEqual(response.status_code, 400)
 
+    # TODO: Test for refunds (Object creation and returned XML)
+    # @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
+    # def test_known_transaction_refund(self):
+    #     transaction = SofortTransaction.objects.get(transaction_id='123-abc-received')
+    #     refund = transaction.create_refund(sender_data=None)
+
     def _create_test_transaction(self, transaction_id):
         return SofortTransaction.objects.create(
             transaction_id=transaction_id,
@@ -143,10 +147,11 @@ class TestSofortTransactions(TestCase):
             email_customer='tech@particulate.me',
             phone_customer=None,
             user_variables=None,
-            sender=None,
+            sender='Test',
             reasons=['Just a test.'],
             currency_code='EUR'
         )
         self.assertEqual(sofort_transaction.status, '')
         # TODO let the transaction be accepted by sofort.com
+        # TODO validate refund
         self.assertFalse(sofort_transaction.refresh_from_sofort(sofort_wrapper=sofort_wrapper))

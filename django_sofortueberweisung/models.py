@@ -4,6 +4,7 @@ from six import python_2_unicode_compatible
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils import timezone
 
 
 @python_2_unicode_compatible
@@ -67,7 +68,7 @@ class SofortTransaction(models.Model):
             "transactions") else {}
 
     def create_refund(self, sofort_wrapper, sender_data, amount=None, reasons=None, partial_refund_id=None,
-                      refund_title=None, get_data_from_api=False):
+                      refund_title=None, get_data_from_api=False, test=True):
         if get_data_from_api:
             refund_data = self.get_transaction_details(sofort_wrapper)
             amount = refund_data.get("amount")
@@ -79,12 +80,8 @@ class SofortTransaction(models.Model):
         xml_data = render_to_string(template_name="django_sofortueberweisung/transaction_refund.xml",
                                     context={"transaction_id": self.transaction_id, "sender": sender_data,
                                              "amount": amount, "reasons": reasons, "title": refund_title,
-                                             "partial_refund_id": partial_refund_id, "test": True})
+                                             "partial_refund_id": partial_refund_id, "test": test})
         response = sofort_wrapper.call_api(xml_data=xml_data)
-        import pprint
-        pprint.pprint(response)
-        pprint.pprint(response["refunds"])
-        pprint.pprint(response["refunds"]["title"])
         if not response:
             return False
         errors = []

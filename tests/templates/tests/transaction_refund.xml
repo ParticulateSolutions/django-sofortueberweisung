@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+    <refunds version="3">
+        <sender>
+            <holder>Max Samplemerchant</holder>
+            <bank_name>Demo Bank</bank_name>
+            <iban>DE11888888889999999999</iban>
+            <bic>SFRTDE20XXX</bic>
+        </sender>
+        <pain>SSBhbSBhIGxpdHRsZSByZWZ1bmQ=</pain>
+        <refund>
+            <recipient>
+                <holder>Max Mustermann</holder>
+                <bank_name>Demo Bank</bank_name>
+                <iban>DE11888888889999999999</iban>
+                <bic>SFRTDE20XXX</bic>
+            </recipient>
+            <transaction>{{ transaction }}</transaction>
+            <amount>{{ amount }}</amount>
+            <time>{{ time }}</time>
+            <partial_refund_id>9n8avtr739</partial_refund_id>
+            <status>{{ status }}</status>
+        </refund>
+</refunds>
