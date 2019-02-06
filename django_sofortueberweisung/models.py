@@ -58,3 +58,60 @@ class SofortTransaction(models.Model):
             return self
         else:
             return False
+
+    def get_transaction_details(self, sofort_wrapper):
+        xml_data = render_to_string(template_name="django_sofortueberweisung/transaction_update.xml",
+                                    context={"transactions": [{"id": self.transaction_id}]})
+        response = sofort_wrapper.call_api(xml_data=xml_data)
+        return response["transactions"].get("transaction_details") or {} if response and response.get(
+            "transactions") else {}
+
+    def create_refund(self, sofort_wrapper, sender_data, amount=None, reasons=None, partial_refund_id=None,
+                      refund_title=None, get_data_from_api=False):
+        if get_data_from_api:
+            refund_data = self.get_transaction_details(sofort_wrapper)
+            amount = refund_data.get("amount")
+            reasons = refund_data["reasons"]
+        if not amount:
+            raise ValueError("No amount for refund given/received from Sofort API")
+        if not refund_title:
+            refund_title = "Refund [{0}] - {1}".format(self.transaction_id, timezone.now().isoformat())
+        xml_data = render_to_string(template_name="django_sofortueberweisung/transaction_refund.xml",
+                                    context={"transaction_id": self.transaction_id, "sender": sender_data,
+                                             "amount": amount, "reasons": reasons, "title": refund_title,
+                                             "partial_refund_id": partial_refund_id, "test": True})
+        response = sofort_wrapper.call_api(xml_data=xml_data)
+        import pprint
+        pprint.pprint(response)
+        pprint.pprint(response["refunds"])
+        pprint.pprint(response["refunds"]["title"])
+        if not response:
+            return False
+        errors = []
+        if "errors" in response:
+            for error in response["errors"]:
+                errors.append(error)
+        if errors != {}:
+            logger = logging.getLogger(__name__)
+            for error in errors:
+                logger.error("Sofort [Refund]: ".format(error))
+
+        if "refunds" in response and "refund" in response["refunds"] and response["refunds"]["refund"].get(
+                "status"):
+            return SofortRefund.objects.create(transaction=self, status=response["refunds"]["refund"]["status"],
+                                               pain=response["refunds"]["pain"],
+                                               title=response["refunds"]["title"])
+
+
+@python_2_unicode_compatible
+class SofortRefund(models.Model):
+    transaction = models.ForeignKey(SofortTransaction, verbose_name=_("Transaction"), related_name="refunds")
+    status = models.CharField(_("status"), max_length=255, blank=True)
+    title = models.CharField(_("Title"), max_length=255, blank=True)
+    pain = models.TextField(_("PAIN base64"))
+
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    last_modified = models.DateTimeField(_("last modified"), auto_now=True)
+
+    objects = models.Manager()
+
