@@ -6,9 +6,9 @@
                   <iban>DE11888888889999999999</iban>
                   <bic>SFRTDE20XXX</bic>
             {% else %}
-                  <holder>{{ sender.privatedonation_owner }}</holder>
-                  <iban>{{ sender.privatedonation_iban }}</iban>
-                  <bic>{{ sender.privatedonation_bic }}</bic>
+                  <holder>{{ sender.holder }}</holder>
+                  <iban>{{ sender.iban }}</iban>
+                  <bic>{{ sender.bic }}</bic>
             {% endif %}
       </sender>
       {% if title %}

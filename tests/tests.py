@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import os
+import os, re
 import xmltodict
 from requests import Response
 from testfixtures import replace
@@ -50,6 +50,9 @@ def mock_urlopen(request, cafile=None):
                         response = TEST_RESPONSES['123-abc-received']
                     elif data['transaction_request']['transaction'] == '123-abc-loss':
                         response = TEST_RESPONSES['123-abc-loss']
+            elif 'refunds' in data:
+                transaction = data['refunds']['refund']['transaction']
+                response = TEST_RESPONSES['refund-transaction-valid'](transaction)
     except KeyError:
         response = False
         result = MockResponse(response)
@@ -119,11 +122,23 @@ class TestSofortNotifications(TestCase):
         response = client.post('/sofort/notify/', data=xml_data, content_type='application/hal+json')
         self.assertEqual(response.status_code, 400)
 
-    # TODO: Test for refunds (Object creation and returned XML)
-    # @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
-    # def test_known_transaction_refund(self):
-    #     transaction = SofortTransaction.objects.get(transaction_id='123-abc-received')
-    #     refund = transaction.create_refund(sender_data=None)
+    # TODO: Test XML response
+    @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
+    def test_known_transaction_refund(self):
+        auth = {
+            'PROJECT_ID': '299010',
+            'USER': '135335',
+            'API_KEY': 'aeb2075b1455a8ce874749e973e61cca',
+        }
+        sofort_wrapper = SofortWrapper(auth=auth)
+        self._create_test_transaction(transaction_id='123-abc-received')
+        transaction = SofortTransaction.objects.get(transaction_id='123-abc-received')
+        refund = transaction.create_refund(sofort_wrapper, sender_data={'owner': 'Test Person', 'iban': 'DE11888888889999999999',
+                                                                        'bic': 'SFRTDE20XXX'}, amount=2.40)
+        self.assertEqual(transaction.transaction_id, refund.transaction.transaction_id)
+        self.assertEqual(transaction, refund.transaction)
+        self.assertRegex(refund.pain, re.compile('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'))
+
 
     def _create_test_transaction(self, transaction_id):
         return SofortTransaction.objects.create(
@@ -152,6 +167,6 @@ class TestSofortTransactions(TestCase):
             currency_code='EUR'
         )
         self.assertEqual(sofort_transaction.status, '')
-        # TODO let the transaction be accepted by sofort.com
-        # TODO validate refund
+        # TODO: let the transaction be accepted by sofort.com
+        # TODO: let the transaction be refunded by sofort.com
         self.assertFalse(sofort_transaction.refresh_from_sofort(sofort_wrapper=sofort_wrapper))

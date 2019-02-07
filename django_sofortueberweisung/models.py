@@ -97,7 +97,7 @@ class SofortTransaction(models.Model):
                 "status"):
             return SofortRefund.objects.create(transaction=self, status=response["refunds"]["refund"]["status"],
                                                pain=response["refunds"]["pain"],
-                                               title=response["refunds"]["title"])
+                                               title=response["refunds"].get("title"))
 
 
 @python_2_unicode_compatible
