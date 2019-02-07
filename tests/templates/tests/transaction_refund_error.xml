@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<refunds version="3">
+    <sender>
+        <holder>Max Samplemerchant</holder>
+        <bank_name>Demo Bank</bank_name>
+        <iban>DE11888888889999999999</iban>
+        <bic>SFRTDE20XXX</bic></sender>
+    <title>Test Refund</title>
+    <refund>
+        <transaction>{{ transaction }}</transaction>
+        <amount>{{ amount }}</amount>
+        <status>error</status>
+        {% if errors %}
+        <errors>
+            {% for error in errors %}
+            <error>
+                <code>{{ error.code }}</code>
+                <message>{{ error.message }}</message>
+            </error>
+            {% endfor %}
+        </errors>
+        {% endif %}
+    </refund>
+</refunds>

@@ -23,3 +23,4 @@ SOFORT_CUSTOMER_PROTECTION = getattr(settings, 'SOFORT_CUSTOMER_PROTECTION', Fal
 SOFORT_LANGUAGE_CODE = getattr(settings, 'SOFORT_LANGUAGE_CODE', None)
 SOFORT_TIMEOUT = getattr(settings, 'SOFORT_TIMEOUT', None)
 SOFORT_VALID_TRANSACTION_STATUS = getattr(settings, 'SOFORT_VALID_TRANSACTION_STATUS', ['received', 'untraceable', 'pending'])
+SOFORT_REFUNDS_TEST = getattr(settings, 'SOFORT_REFUNDS_TEST', True)

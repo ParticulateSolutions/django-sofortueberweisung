@@ -52,7 +52,10 @@ def mock_urlopen(request, cafile=None):
                         response = TEST_RESPONSES['123-abc-loss']
             elif 'refunds' in data:
                 transaction = data['refunds']['refund']['transaction']
-                response = TEST_RESPONSES['refund-transaction-valid'](transaction)
+                if transaction == '123-refund-error':
+                    response = TEST_RESPONSES['refund-transaction-invalid'](transaction)
+                else:
+                    response = TEST_RESPONSES['refund-transaction-valid'](transaction)
     except KeyError:
         response = False
         result = MockResponse(response)
@@ -125,19 +128,26 @@ class TestSofortNotifications(TestCase):
     # TODO: Test XML response
     @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
     def test_known_transaction_refund(self):
-        auth = {
-            'PROJECT_ID': '299010',
-            'USER': '135335',
-            'API_KEY': 'aeb2075b1455a8ce874749e973e61cca',
-        }
-        sofort_wrapper = SofortWrapper(auth=auth)
         self._create_test_transaction(transaction_id='123-abc-received')
         transaction = SofortTransaction.objects.get(transaction_id='123-abc-received')
-        refund = transaction.create_refund(sofort_wrapper, sender_data={'owner': 'Test Person', 'iban': 'DE11888888889999999999',
+        refund = transaction.create_refund(self.sofort_wrapper, sender_data={'owner': 'Test Person', 'iban': 'DE11888888889999999999',
                                                                         'bic': 'SFRTDE20XXX'}, amount=2.40)
         self.assertEqual(transaction.transaction_id, refund.transaction.transaction_id)
         self.assertEqual(transaction, refund.transaction)
+        self.assertEqual(refund.status, 'accepted')
         self.assertRegex(refund.pain, re.compile('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'))
+
+    @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
+    def test_known_transaction_refund_error(self):
+        self._create_test_transaction(transaction_id='123-refund-error')
+        transaction = SofortTransaction.objects.get(transaction_id='123-refund-error')
+        refund = transaction.create_refund(self.sofort_wrapper, sender_data={'owner': 'Test Person', 'iban': 'DE11888888889999999999',
+                                                                        'bic': 'SFRTDE20XXX'}, amount=2.40)
+        self.assertEqual(transaction.transaction_id, refund.transaction.transaction_id)
+        self.assertEqual(transaction, refund.transaction)
+        self.assertEqual(refund.status, 'error')
+        self.assertGreaterEqual(refund.errors.count(), 1)
+        self.assertTrue(refund.errors.filter(error_code='5003'))
 
 
     def _create_test_transaction(self, transaction_id):
