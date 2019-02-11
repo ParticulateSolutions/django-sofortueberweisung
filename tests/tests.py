@@ -3,7 +3,8 @@
 
 from __future__ import unicode_literals
 
-import os, re
+import os, sys
+import re
 import xmltodict
 from requests import Response
 from testfixtures import replace
@@ -135,7 +136,10 @@ class TestSofortNotifications(TestCase):
         self.assertEqual(transaction.transaction_id, refund.transaction.transaction_id)
         self.assertEqual(transaction, refund.transaction)
         self.assertEqual(refund.status, 'accepted')
-        self.assertRegex(refund.pain, re.compile('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'))
+        if sys.version_info[0] < 3:
+            self.assertRegexpMatches(refund.pain, re.compile('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'))
+        else:
+            self.assertRegex(refund.pain, re.compile('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'))
 
     @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
     def test_known_transaction_refund_error(self):
