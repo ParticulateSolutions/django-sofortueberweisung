@@ -27,8 +27,9 @@ except ImportError:
     # Fall back to Python 2's urllib2
     from urllib2 import HTTPError, Request, urlopen
 
+app_name='sofort'
 urlpatterns = [
-    url(r'^sofort/$', include('django_sofortueberweisung.urls', namespace='sofort', app_name='sofort')),
+    url(r'^sofort/$', include('django_sofortueberweisung.urls')),
 ]
 
 
