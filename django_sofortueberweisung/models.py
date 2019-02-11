@@ -124,7 +124,7 @@ class SofortTransaction(models.Model):
 
 @python_2_unicode_compatible
 class SofortRefund(models.Model):
-    transaction = models.ForeignKey(SofortTransaction, verbose_name=_("Transaction"), related_name="refunds")
+    transaction = models.ForeignKey(SofortTransaction, verbose_name=_("Transaction"), related_name="refunds", on_delete=models.SET_NULL)
     status = models.CharField(_("status"), max_length=255, blank=True)
     title = models.CharField(_("Title"), max_length=255, blank=True, null=True)
     amount = models.DecimalField(_('Amount'), max_digits=8, decimal_places=2)
