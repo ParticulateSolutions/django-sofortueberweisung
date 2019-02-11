@@ -18,6 +18,9 @@ class SofortError(models.Model):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     last_modified = models.DateTimeField(_("last modified"), auto_now=True)
 
+    def __str__(self):
+        return "{0} - {1}".format(self.error_code, self.error_message)
+
 
 @python_2_unicode_compatible
 class SofortTransaction(models.Model):
@@ -132,3 +135,6 @@ class SofortRefund(models.Model):
     last_modified = models.DateTimeField(_("last modified"), auto_now=True)
 
     objects = models.Manager()
+
+    def __str__(self):
+        return "Refund [{0}] - {1}".format(self.transaction.transaction_id, self.status)
