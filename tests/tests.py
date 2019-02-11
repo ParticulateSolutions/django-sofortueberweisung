@@ -3,12 +3,11 @@
 
 from __future__ import unicode_literals
 
-import os
-import time
+import os, sys
+import re
 import xmltodict
-from pip._vendor.requests import Response
+from requests import Response
 from testfixtures import replace
-
 
 from django.conf.urls import include, url
 from django.test import Client, TestCase
@@ -28,8 +27,9 @@ except ImportError:
     # Fall back to Python 2's urllib2
     from urllib2 import HTTPError, Request, urlopen
 
+app_name='sofort'
 urlpatterns = [
-    url(r'^sofort/$', include('django_sofortueberweisung.urls', namespace='sofort', app_name='sofort')),
+    url(r'^sofort/$', include('django_sofortueberweisung.urls')),
 ]
 
 
@@ -52,6 +52,12 @@ def mock_urlopen(request, cafile=None):
                         response = TEST_RESPONSES['123-abc-received']
                     elif data['transaction_request']['transaction'] == '123-abc-loss':
                         response = TEST_RESPONSES['123-abc-loss']
+            elif 'refunds' in data:
+                transaction = data['refunds']['refund']['transaction']
+                if transaction == '123-refund-error':
+                    response = TEST_RESPONSES['refund-transaction-invalid'](transaction)
+                else:
+                    response = TEST_RESPONSES['refund-transaction-valid'](transaction)
     except KeyError:
         response = False
         result = MockResponse(response)
@@ -121,6 +127,34 @@ class TestSofortNotifications(TestCase):
         response = client.post('/sofort/notify/', data=xml_data, content_type='application/hal+json')
         self.assertEqual(response.status_code, 400)
 
+    # TODO: Test XML response
+    @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
+    def test_known_transaction_refund(self):
+        self._create_test_transaction(transaction_id='123-abc-received')
+        transaction = SofortTransaction.objects.get(transaction_id='123-abc-received')
+        refund = transaction.create_refund(self.sofort_wrapper, sender_data={'owner': 'Test Person', 'iban': 'DE11888888889999999999',
+                                                                        'bic': 'SFRTDE20XXX'}, amount=2.40)
+        self.assertEqual(transaction.transaction_id, refund.transaction.transaction_id)
+        self.assertEqual(transaction, refund.transaction)
+        self.assertEqual(refund.status, 'accepted')
+        if sys.version_info[0] < 3:
+            self.assertRegexpMatches(refund.pain, re.compile('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'))
+        else:
+            self.assertRegex(refund.pain, re.compile('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'))
+
+    @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
+    def test_known_transaction_refund_error(self):
+        self._create_test_transaction(transaction_id='123-refund-error')
+        transaction = SofortTransaction.objects.get(transaction_id='123-refund-error')
+        refund = transaction.create_refund(self.sofort_wrapper, sender_data={'owner': 'Test Person', 'iban': 'DE11888888889999999999',
+                                                                        'bic': 'SFRTDE20XXX'}, amount=2.40)
+        self.assertEqual(transaction.transaction_id, refund.transaction.transaction_id)
+        self.assertEqual(transaction, refund.transaction)
+        self.assertEqual(refund.status, 'error')
+        self.assertGreaterEqual(refund.errors.count(), 1)
+        self.assertTrue(refund.errors.filter(error_code='5003'))
+
+
     def _create_test_transaction(self, transaction_id):
         return SofortTransaction.objects.create(
             transaction_id=transaction_id,
@@ -143,10 +177,11 @@ class TestSofortTransactions(TestCase):
             email_customer='tech@particulate.me',
             phone_customer=None,
             user_variables=None,
-            sender=None,
+            sender='Test',
             reasons=['Just a test.'],
             currency_code='EUR'
         )
         self.assertEqual(sofort_transaction.status, '')
-        # TODO let the transaction be accepted by sofort.com
+        # TODO: let the transaction be accepted by sofort.com
+        # TODO: let the transaction be refunded by sofort.com
         self.assertFalse(sofort_transaction.refresh_from_sofort(sofort_wrapper=sofort_wrapper))

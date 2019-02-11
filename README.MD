@@ -1,5 +1,12 @@
 # django-sofortueberweisung [![Build Status](https://travis-ci.org/ParticulateSolutions/django-sofortueberweisung.svg?branch=master)](https://travis-ci.org/ParticulateSolutions/django-sofortueberweisung)
 
+
+## What do you need for django-sofortueberweisung?
+
+1. An account on sofort.com
+2. Django >= 1.8
+3. xmltodict >= 0.9.2
+
 ## How to install django-sofortueberweisung?
 
 There are just two steps needed to install django-sofortueberweisung:
@@ -65,9 +72,20 @@ There are just two steps needed to install django-sofortueberweisung:
         url('^sofortueberweisung/', include('django_sofortueberweisung.urls')),
     ]
 	```
+	
+## refunds
 
-## What do you need for django-sofortueberweisung?
+To initiate a refund, you need to pass an `instance` of `SofortWrapper` as first parameter, and `sender_data` as second.
+`sender_data` should be a `dict` containing keys for `holder`, `iban` and `bic`. Those are your own bank details, not the receiver's.
+ 
+ Refunds are sent with test data by default. To use the values passed for `sender_data` change `SOFORT_REFUNDS_TEST` 
+ inside your settings to `False`.
+ 
+```python
+sofort_transaction = SofortTransaction.objects.get(transaction_id=<transaction_id>)
+sofort_transaction.create_refund(sofort_wrapper, sender_data, <optional params>)
+```
+This will create and return an instance of `SofortRefund` if request has been successful. If errors have occurred, 
+relations to `SofortError` are being created.
 
-1. An account on sofort.com
-2. Django >= 1.8
-3. xmltodict >= 0.9.2
+For more options, read the code and Sofort API documentation
