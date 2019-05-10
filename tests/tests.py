@@ -14,7 +14,7 @@ from django.test import Client, TestCase
 
 from django_sofortueberweisung import settings as django_sofortueberweisung_settings
 from django_sofortueberweisung.models import SofortTransaction
-from django_sofortueberweisung.wrappers import SofortWrapper
+from django_sofortueberweisung.wrappers import SofortWrapper, DjangoSofortError
 
 from .test_response_mockups import TEST_RESPONSES
 
@@ -124,8 +124,7 @@ class TestSofortNotifications(TestCase):
         self._create_test_transaction(transaction_id='123-abc-unknown')
         post_data = {'status_notification': {'transaction': '123-abc-unknown'}}
         xml_data = xmltodict.unparse(post_data)
-        response = client.post('/sofort/notify/', data=xml_data, content_type='application/hal+json')
-        self.assertEqual(response.status_code, 400)
+        self.assertRaises(Exception, client.post, '/sofort/notify/', data=xml_data, content_type='application/hal+json')
 
     # TODO: Test XML response
     @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
