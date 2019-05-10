@@ -24,6 +24,10 @@ except ImportError:
     from urllib2 import HTTPError, Request, urlopen
 
 
+class DjangoSofortError(Exception):
+    pass
+
+
 class SofortWrapper(object):
 
     api_url = 'https://api.sofort.com/api/xml'
@@ -75,9 +79,6 @@ class SofortWrapper(object):
         }
         xml_data = render_to_string('django_sofortueberweisung/transaction_init.xml', context=data)
         response = self.call_api(xml_data=xml_data)
-
-        if response is False:
-            return False
         
         errors = []
         if 'errors' in response:
@@ -93,11 +94,12 @@ class SofortWrapper(object):
                 for warning in new_transaction['warnings']:
                     warnings.append(warning)
 
+        if errors:
+            raise DjangoSofortError('Errors: [{}]'.format(', '.join(errors)))
+
         try:
-            if errors != {} or warnings != {}:
+            if warnings != {}:
                 logger = logging.getLogger(__name__)
-                for error in errors:
-                    logger.error("Sofort: ".format(error.get('message', '')))
                 for warning in warnings:
                     logger.warning("Sofort: ".format(warning.get('message', '')))
         except:
@@ -111,11 +113,11 @@ class SofortWrapper(object):
                 logger.error(_("Sofort: transaction id already in database"))
                 return False
         else:
-            return False
+            raise DjangoSofortError('Failed to create new transaction')
 
     def call_api(self, url=None, xml_data=None):
         if not self.auth:
-            return False
+            raise ValueError('Missing or incorrect authentication.')
         if url is None:
             url = SofortWrapper.api_url
         request = Request(url)
@@ -135,16 +137,15 @@ class SofortWrapper(object):
             else:
                 response = urlopen(request)
         except HTTPError as e:
-            logger = logging.getLogger(__name__)
             fp = e.fp
             body = fp.read()
             fp.close()
             if hasattr(e, 'code'):
-                logger.error("Paydirekt Error {0}({1}): {2}".format(e.code, e.msg, body))
+                raise DjangoSofortError('Paydirekt Error {0}({1}): {2}'.format(e.code, e.msg, body))
             else:
-                logger.error("Paydirekt Error({0}): {1}".format(e.msg, body))
+                raise DjangoSofortError('Paydirekt Error ({0}): {1}'.format(e.msg, body))
         else:
             if (hasattr(response, 'status') and str(response.status).startswith('2')) or (hasattr(response, 'status_code') and str(response.status_code).startswith('2')) or (hasattr(response, 'code') and str(response.code).startswith('2')):
                 response_body = response.read()
                 return xmltodict.parse(response_body)
-        return False
+        return DjangoSofortError('Api request failed.')
