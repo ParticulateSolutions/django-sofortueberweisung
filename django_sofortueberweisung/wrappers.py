@@ -2,6 +2,7 @@ import base64
 import logging
 import os
 import sys
+import json
 
 import xmltodict
 from django.conf import settings
@@ -24,11 +25,15 @@ except ImportError:
     from urllib2 import HTTPError, Request, urlopen
 
 
-class SofortWrapper(object):
+class DjangoSofortError(Exception):
+    pass
 
+
+class SofortWrapper(object):
     api_url = 'https://api.sofort.com/api/xml'
     interface_version = 'django_sofortueberweisung_v%s' % __version__
-    cafile = os.path.join(os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'django_sofortueberweisung')), 'cacert.pem')
+    cafile = os.path.join(os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'django_sofortueberweisung')),
+                          'cacert.pem')
     auth = None
 
     def __init__(self, auth=None):
@@ -37,19 +42,19 @@ class SofortWrapper(object):
             self.auth = auth
 
     def init(self,
-        amount,
-        email_customer=None,
-        phone_customer=None,
-        user_variables=None,
-        sender=None,
-        reasons=None,
-        currency_code='EUR',
-        success_url=django_sofortueberweisung_settings.SOFORT_SUCCESS_URL,
-        success_link_redirect=django_sofortueberweisung_settings.SOFORT_SUCCESS_REDIRECT,
-        abort_url=django_sofortueberweisung_settings.SOFORT_ABORT_URL,
-        timeout_url=django_sofortueberweisung_settings.SOFORT_TIMEOUT_URL,
-        notification_urls=django_sofortueberweisung_settings.SOFORT_NOTIFICATION_URLS,
-        language_code=django_sofortueberweisung_settings.SOFORT_LANGUAGE_CODE):
+             amount,
+             email_customer=None,
+             phone_customer=None,
+             user_variables=None,
+             sender=None,
+             reasons=None,
+             currency_code='EUR',
+             success_url=django_sofortueberweisung_settings.SOFORT_SUCCESS_URL,
+             success_link_redirect=django_sofortueberweisung_settings.SOFORT_SUCCESS_REDIRECT,
+             abort_url=django_sofortueberweisung_settings.SOFORT_ABORT_URL,
+             timeout_url=django_sofortueberweisung_settings.SOFORT_TIMEOUT_URL,
+             notification_urls=django_sofortueberweisung_settings.SOFORT_NOTIFICATION_URLS,
+             language_code=django_sofortueberweisung_settings.SOFORT_LANGUAGE_CODE):
 
         if not self.auth:
             return False
@@ -76,9 +81,6 @@ class SofortWrapper(object):
         xml_data = render_to_string('django_sofortueberweisung/transaction_init.xml', context=data)
         response = self.call_api(xml_data=xml_data)
 
-        if response is False:
-            return False
-        
         errors = []
         if 'errors' in response:
             for error in response['errors']:
@@ -93,11 +95,12 @@ class SofortWrapper(object):
                 for warning in new_transaction['warnings']:
                     warnings.append(warning)
 
+        if errors:
+            raise DjangoSofortError('Errors: [{}]'.format(', '.join([json.dumps(x) for x in errors])))
+
         try:
-            if errors != {} or warnings != {}:
+            if warnings != {}:
                 logger = logging.getLogger(__name__)
-                for error in errors:
-                    logger.error("Sofort: ".format(error.get('message', '')))
                 for warning in warnings:
                     logger.warning("Sofort: ".format(warning.get('message', '')))
         except:
@@ -111,11 +114,11 @@ class SofortWrapper(object):
                 logger.error(_("Sofort: transaction id already in database"))
                 return False
         else:
-            return False
+            raise DjangoSofortError('Failed to create new transaction')
 
     def call_api(self, url=None, xml_data=None):
         if not self.auth:
-            return False
+            raise ValueError('Missing or incorrect authentication.')
         if url is None:
             url = SofortWrapper.api_url
         request = Request(url)
@@ -130,21 +133,23 @@ class SofortWrapper(object):
             request.data = xml_data
 
         try:
-            if sys.version_info.major > 2 or (sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
+            if sys.version_info.major > 2 or (
+                    sys.version_info.major == 2 and sys.version_info.major > 7 or (sys.version_info.major == 7 and sys.version_info.major >= 9)):
                 response = urlopen(request, cafile=self.cafile)
             else:
                 response = urlopen(request)
         except HTTPError as e:
-            logger = logging.getLogger(__name__)
             fp = e.fp
             body = fp.read()
             fp.close()
             if hasattr(e, 'code'):
-                logger.error("Paydirekt Error {0}({1}): {2}".format(e.code, e.msg, body))
+                raise DjangoSofortError('Paydirekt Error {0}({1}): {2}'.format(e.code, e.msg, body))
             else:
-                logger.error("Paydirekt Error({0}): {1}".format(e.msg, body))
+                raise DjangoSofortError('Paydirekt Error ({0}): {1}'.format(e.msg, body))
         else:
-            if (hasattr(response, 'status') and str(response.status).startswith('2')) or (hasattr(response, 'status_code') and str(response.status_code).startswith('2')) or (hasattr(response, 'code') and str(response.code).startswith('2')):
+            if (hasattr(response, 'status') and str(response.status).startswith('2')) or (
+                    hasattr(response, 'status_code') and str(response.status_code).startswith('2')) or (
+                    hasattr(response, 'code') and str(response.code).startswith('2')):
                 response_body = response.read()
                 return xmltodict.parse(response_body)
-        return False
+        raise DjangoSofortError('Api request failed.')
