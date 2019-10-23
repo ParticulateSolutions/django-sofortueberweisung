@@ -3,19 +3,18 @@
 
 from __future__ import unicode_literals
 
-import os, sys
 import re
+import sys
+
 import xmltodict
+from django.conf.urls import include, url
+from django.test import Client, TestCase
 from requests import Response
 from testfixtures import replace
 
-from django.conf.urls import include, url
-from django.test import Client, TestCase
-
 from django_sofortueberweisung import settings as django_sofortueberweisung_settings
 from django_sofortueberweisung.models import SofortTransaction
-from django_sofortueberweisung.wrappers import SofortWrapper, DjangoSofortError
-
+from django_sofortueberweisung.wrappers import SofortWrapper
 from .test_response_mockups import TEST_RESPONSES
 
 try:
@@ -153,34 +152,8 @@ class TestSofortNotifications(TestCase):
         self.assertGreaterEqual(refund.errors.count(), 1)
         self.assertTrue(refund.errors.filter(error_code='5003'))
 
-
     def _create_test_transaction(self, transaction_id):
         return SofortTransaction.objects.create(
             transaction_id=transaction_id,
             payment_url='https://www.sofort.com/payment/go/'+transaction_id
         )
-
-
-class TestSofortTransactions(TestCase):
-    auth = {
-        'PROJECT_ID': '299010',
-        'USER': '135335',
-        'API_KEY': 'aeb2075b1455a8ce874749e973e61cca',
-    }
-    cafile = os.path.join(os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), 'django_sofortueberweisung')), 'cacert.pem')
-
-    def test_valid_transaction(self):
-        sofort_wrapper = SofortWrapper(auth=self.auth)
-        sofort_transaction = sofort_wrapper.init(
-            amount=1.0,
-            email_customer='tech@particulate.me',
-            phone_customer=None,
-            user_variables=None,
-            sender='Test',
-            reasons=['Just a test.'],
-            currency_code='EUR'
-        )
-        self.assertEqual(sofort_transaction.status, '')
-        # TODO: let the transaction be accepted by sofort.com
-        # TODO: let the transaction be refunded by sofort.com
-        self.assertFalse(sofort_transaction.refresh_from_sofort(sofort_wrapper=sofort_wrapper))
