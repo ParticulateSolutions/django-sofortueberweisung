@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import re
-import sys
-
 import xmltodict
 from django.conf.urls import include, url
 from django.test import Client, TestCase
@@ -17,14 +13,10 @@ from django_sofortueberweisung.models import SofortTransaction
 from django_sofortueberweisung.wrappers import SofortWrapper
 from .test_response_mockups import TEST_RESPONSES
 
-try:
-    # For Python 3.0 and later
-    from urllib.error import HTTPError
-    from urllib.request import urlopen
-    from urllib.request import Request
-except ImportError:
-    # Fall back to Python 2's urllib2
-    from urllib2 import HTTPError, Request, urlopen
+from urllib.error import HTTPError
+from urllib.request import urlopen
+from urllib.request import Request
+
 
 app_name='sofort'
 urlpatterns = [
@@ -135,10 +127,7 @@ class TestSofortNotifications(TestCase):
         self.assertEqual(transaction.transaction_id, refund.transaction.transaction_id)
         self.assertEqual(transaction, refund.transaction)
         self.assertEqual(refund.status, 'accepted')
-        if sys.version_info[0] < 3:
-            self.assertRegexpMatches(refund.pain, re.compile('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'))
-        else:
-            self.assertRegex(refund.pain, re.compile('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'))
+        self.assertRegex(refund.pain, re.compile('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$'))
 
     @replace('django_sofortueberweisung.wrappers.urlopen', mock_urlopen)
     def test_known_transaction_refund_error(self):

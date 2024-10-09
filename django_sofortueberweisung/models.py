@@ -1,15 +1,13 @@
 import logging
 from django.template.loader import render_to_string
-from six import python_2_unicode_compatible
 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
 from django_sofortueberweisung import settings as django_sofortueberweisung_settings
 
 
-@python_2_unicode_compatible
 class SofortError(models.Model):
     error_code = models.CharField(_('error code'), max_length=30)
     error_message = models.CharField(_('error code'), max_length=255)
@@ -22,7 +20,6 @@ class SofortError(models.Model):
         return "{0} - {1}".format(self.error_code, self.error_message)
 
 
-@python_2_unicode_compatible
 class SofortTransaction(models.Model):
     transaction_id = models.CharField(_("transaction id"), max_length=255, unique=True)
     status = models.CharField(_("status"), max_length=255, blank=True)
@@ -122,7 +119,6 @@ class SofortTransaction(models.Model):
             return sofort_refund
 
 
-@python_2_unicode_compatible
 class SofortRefund(models.Model):
     transaction = models.ForeignKey(SofortTransaction, verbose_name=_("Transaction"), related_name="refunds",
                                     on_delete=models.SET_NULL, null=True)
