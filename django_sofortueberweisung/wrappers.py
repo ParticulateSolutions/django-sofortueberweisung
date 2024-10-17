@@ -8,21 +8,16 @@ import xmltodict
 from django.conf import settings
 from django.db import IntegrityError
 from django.template.loader import render_to_string
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from django_sofortueberweisung import \
     settings as django_sofortueberweisung_settings
 from django_sofortueberweisung.__init__ import __version__
 from django_sofortueberweisung.models import SofortTransaction
 
-try:
-    # For Python 3.0 and later
-    from urllib.error import HTTPError
-    from urllib.request import urlopen
-    from urllib.request import Request
-except ImportError:
-    # Fall back to Python 2's urllib2
-    from urllib2 import HTTPError, Request, urlopen
+from urllib.error import HTTPError
+from urllib.request import urlopen
+from urllib.request import Request
 
 
 class DjangoSofortError(Exception):
